@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "lib/ruby-ext-js.rb",
+    "ruby-ext-js.gemspec",
     "spec/ruby-ext-js_spec.rb",
     "spec/spec_helper.rb"
   ]
