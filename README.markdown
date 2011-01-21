@@ -4,7 +4,21 @@ Provides ultra-basic classes for translating Ext.js GET params to Postgres (via 
 
 Examples:
 
+## MongoDB
+
+    class PullRequests < ExtJs::Mongo
+      def self.allowed_filters
+        ["state"]
+      end
+    end
+    
+    mongo = PullRequests.new( params )
+    mongo.conditions # search conditions
+    mongo.options # pagination and sorting options
+
 ## Postgres
+
+(Implementation and API will change significantly in the future, don't use this yet.)
 
     module ExtJs
       class PullRequests < Postgres
@@ -29,18 +43,6 @@ Examples:
           end
           
           db_opts.merge filters
-        end
-      end
-    end
-
-## MongoDB
-
-Mongo's a lot easier to work with:
-
-    module ExtJs
-      class PullRequests < Mongo
-        def self.allowed_filters
-          ["state"]
         end
       end
     end

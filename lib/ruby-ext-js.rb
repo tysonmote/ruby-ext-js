@@ -65,68 +65,81 @@ module ExtJs
   end
   
   class Mongo
-    MAX_PER_PAGE = 1000
-    DEFAULT_PAGE = 1
-    DEFAULT_PER_PAGE = 30
+    DEFAULT_SKIP = 0
+    MAX_LIMIT = 500
+    DEFAULT_LIMIT = 50
     
-    def self.db_opts( params )
+    def initialize( params )
+      @params = params
+    end
+    
+    # @return [Hash] `find()` conditions for `Mongo::Collection.find( conditions, opts )`
+    def conditions
+      self.class.search_param( @params )
+    end
+    
+    # @return [Hash] `find()` options for `Mongo::Collection.find( conditions, opts )`
+    def options
       opts = {}
       
-      opts.merge! page_param( params )
-      opts.merge! per_page_param( params )
-      opts.merge! sort_param( params )
-      opts.merge! search_param( params )
+      opts.merge! self.class.skip_param( @params )
+      opts.merge! self.class.limit_param( @params )
+      opts.merge! self.class.sort_param( @params )
       
       opts
     end
     
-    protected
-    
+    # @return [Array] Array of string values representing keys that are filterable.
     def self.allowed_filters
       []
     end
     
-    def self.page_param( params )
-      return { :page => DEFAULT_PAGE } unless params.key?( "start" ) && params.key?( "limit" )
-      
-      start = params["start"].to_i
-      limit = per_page_param( params )[:per_page]
-      
-      { :page => ( start / limit ) + 1 }
+    protected
+    
+    def self.skip_param( params )
+      return { :skip => DEFAULT_SKIP } unless params.key?( "start" ) && params.key?( "limit" )
+      { :skip => [params["start"].to_i, 0].max }
     end
     
-    def self.per_page_param( params )
-      unless params.key?( "limit" ) && params["limit"].to_i > 0
-        return { :per_page => DEFAULT_PER_PAGE }
-      end
-      { :per_page => [params["limit"].to_i, MAX_PER_PAGE].min }
+    def self.limit_param( params )
+      return { :limit => DEFAULT_LIMIT } unless params.key?( "limit" ) && params["limit"].to_i > 0
+      { :limit => [params["limit"].to_i, MAX_LIMIT].min }
     end
     
     def self.sort_param( params )
       return {} unless params.key?( "sort" )
       
       sort = params["sort"] ? params["sort"].to_sym : :id
-      sort = params["dir"] =~ /desc/i ? sort.desc : sort.asc
+      dir = params["dir"] =~ /desc/i ? :desc : :asc
       
-      { :sort => sort }
+      { :sort => [sort, dir] }
     end
     
     def self.search_param( params )
-      if params["filter"] && params["filter"]["0"]
-        field = params["filter"]["0"]["field"].gsub(/[^\.\w\d_-]/, "").strip
-        values = Array( params["filter"]["0"]["data"]["value"] )
-        
-        if values.size == 1
-          values = values[0]
-        else
-          values = { "$in" => values }
-        end
-        
-        unless field.blank? || !allowed_filters.include?( field ) || values.blank?
-          return { field => values }
+      conds = {}
+      
+      if params["filter"] && params["filter"].size > 0
+        0.upto( params["filter"].size - 1 ).each do |i|
+          i = i.to_s
+          
+          next unless params["filter"][i]
+          
+          field = (params["filter"][i]["field"] || "").gsub(/[^\.\w\d_-]/, "").strip
+          values = Array( params["filter"][i]["data"] ? params["filter"][i]["data"]["value"] : nil )
+          
+          if values.size == 1
+            values = values[0]
+          elsif values.size > 1
+            values = { "$in" => values }
+          end
+          
+          unless field.empty? || !allowed_filters.include?( field ) || values.empty?
+            conds.merge! field => values
+          end
         end
       end
-      {}
+      
+      conds
     end
   end
 end
