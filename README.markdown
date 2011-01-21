@@ -65,6 +65,10 @@ Examples:
 
 Version number conventions: Patch-level bumps for bug fixes, minor-level bumps for changes that break backwards-compatibility, major-level bumps for major new features.
 
+## 0.2.1
+
+* `ExtJs::Mongo.options` fixes.
+
 ## 0.2.0
 
 * `ExtJs::Mongo.conditions` now returns a hash with string keys only instead of mixed string / symbol keys for better consistency with the [MongoDB Ruby driver](http://api.mongodb.org/ruby/1.2.0/index.html)

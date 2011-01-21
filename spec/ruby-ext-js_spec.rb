@@ -4,7 +4,7 @@ describe "ExtJs" do
   # describe "Postgres" do
   #   it "sorts on id when you ask it to sort on created_at" do
   #     ExtJs::Postgres.pagination_opts({
-  #       "sort" => "created_at",
+  #       :sort => "created_at",
   #       :order => "desc"
   #     })[:order].should == [:id.asc]
   #   end
@@ -91,25 +91,25 @@ describe "ExtJs" do
       class TestMongo < ExtJs::Mongo; end
       
       it "handles empty params with sensible defaults" do
-        TestMongo.new( {} ).options.should == { "limit" => 50, "skip" => 0 }
+        TestMongo.new( {} ).options.should == { :limit => 50, :skip => 0 }
       end
       
       it "handles pagination" do
-        TestMongo.new( "start" => "50", "limit" => "10" ).options.should == { "limit" => 10, "skip" => 50 }
-        TestMongo.new( "start" => "10" ).options.should == { "limit" => 50, "skip" => 0 }
-        TestMongo.new( "limit" => "10" ).options.should == { "limit" => 10, "skip" => 0 }
+        TestMongo.new( "start" => "50", "limit" => "10" ).options.should == { :limit => 10, :skip => 50 }
+        TestMongo.new( "start" => "10" ).options.should == { :limit => 50, :skip => 0 }
+        TestMongo.new( "limit" => "10" ).options.should == { :limit => 10, :skip => 0 }
       end
       
       it "handles sorting" do
-        TestMongo.new( "sort" => "foo" ).options.should == { "limit" => 50, "skip" => 0, "sort" => [:foo, :asc] }
-        TestMongo.new( "sort" => "foo", "dir" => "desc" ).options.should == { "limit" => 50, "skip" => 0, "sort" => [:foo, :desc] }
-        TestMongo.new( "sort" => "foo", "dir" => "no idea" ).options.should == { "limit" => 50, "skip" => 0, "sort" => [:foo, :asc] }
-        TestMongo.new( "dir" => "asc" ).options.should == { "limit" => 50, "skip" => 0 }
+        TestMongo.new( "sort" => "foo" ).options.should == { :limit => 50, :skip => 0, :sort => [:foo, :asc] }
+        TestMongo.new( "sort" => "foo", "dir" => "desc" ).options.should == { :limit => 50, :skip => 0, :sort => [:foo, :desc] }
+        TestMongo.new( "sort" => "foo", "dir" => "no idea" ).options.should == { :limit => 50, :skip => 0, :sort => [:foo, :asc] }
+        TestMongo.new( "dir" => "asc" ).options.should == { :limit => 50, :skip => 0 }
       end
       
       it "prevents dumb queries" do
-        TestMongo.new( "start" => "9999999", "limit" => "9999999" ).options.should == { "limit" => 500, "skip" => 9999999 }
-        TestMongo.new( "start" => "-200", "limit" => "-200" ).options.should == { "limit" => 50, "skip" => 0 }
+        TestMongo.new( "start" => "9999999", "limit" => "9999999" ).options.should == { :limit => 500, :skip => 9999999 }
+        TestMongo.new( "start" => "-200", "limit" => "-200" ).options.should == { :limit => 50, :skip => 0 }
       end
     end
   end
