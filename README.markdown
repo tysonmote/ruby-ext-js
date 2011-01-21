@@ -61,6 +61,22 @@ Examples:
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
+# Version history
+
+Version number conventions: Patch-level bumps for bug fixes, minor-level bumps for changes that break backwards-compatibility, major-level bumps for major new features.
+
+## 0.2.0
+
+* `ExtJs::Mongo.conditions` now returns a hash with string keys only instead of mixed string / symbol keys for better consistency with the [MongoDB Ruby driver](http://api.mongodb.org/ruby/1.2.0/index.html)
+
+## 0.1.0
+
+* All-new API for `ExtJs::Mongo` to match with MongoDB's Ruby drivers better.
+
+## 0.0.1
+
+* Initial release. Basic Postgres / Mongo adapters.
+
 # Copyright
 
 Copyright (c) 2011 CrowdFlower. See LICENSE.txt for

@@ -22,7 +22,7 @@ module ExtJs
       {
         :order => [order],
         :offset => offset,
-        :limit => limit
+        "limit" => limit
       }
     end
     
@@ -70,7 +70,10 @@ module ExtJs
     DEFAULT_LIMIT = 50
     
     def initialize( params )
-      @params = params
+      @params = {}
+      params.each do |k, v|
+        @params[k.to_s] = v
+      end
     end
     
     # @return [Hash] `find()` conditions for `Mongo::Collection.find( conditions, opts )`
@@ -97,13 +100,13 @@ module ExtJs
     protected
     
     def self.skip_param( params )
-      return { :skip => DEFAULT_SKIP } unless params.key?( "start" ) && params.key?( "limit" )
-      { :skip => [params["start"].to_i, 0].max }
+      return { "skip" => DEFAULT_SKIP } unless params.key?( "start" ) && params.key?( "limit" )
+      { "skip" => [params["start"].to_i, 0].max }
     end
     
     def self.limit_param( params )
-      return { :limit => DEFAULT_LIMIT } unless params.key?( "limit" ) && params["limit"].to_i > 0
-      { :limit => [params["limit"].to_i, MAX_LIMIT].min }
+      return { "limit" => DEFAULT_LIMIT } unless params.key?( "limit" ) && params["limit"].to_i > 0
+      { "limit" => [params["limit"].to_i, MAX_LIMIT].min }
     end
     
     def self.sort_param( params )
@@ -112,7 +115,7 @@ module ExtJs
       sort = params["sort"] ? params["sort"].to_sym : :id
       dir = params["dir"] =~ /desc/i ? :desc : :asc
       
-      { :sort => [sort, dir] }
+      { "sort" => [sort, dir] }
     end
     
     def self.search_param( params )
