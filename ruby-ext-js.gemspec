@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{ruby-ext-js}
-  s.version = "0.2.1"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tyson Tate"]
-  s.date = %q{2011-01-21}
+  s.date = %q{2011-01-24}
   s.description = %q{Ultra-basic classes for working with Ext.js requests and translating them to DataMapper / Mongood query opts.}
   s.email = %q{tyson@doloreslabs.com}
   s.extra_rdoc_files = [
