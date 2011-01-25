@@ -65,6 +65,10 @@ Examples:
 
 Version number conventions: Patch-level bumps for bug fixes, minor-level bumps for changes that break backwards-compatibility, major-level bumps for major new features.
 
+## 0.3.0
+
+* `ExtJs::Mongo` now supports 'date' filter params with "gt" and "lt" params.
+
 ## 0.2.1
 
 * `ExtJs::Mongo.options` fixes.
