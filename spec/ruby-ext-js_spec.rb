@@ -88,9 +88,10 @@ describe "ExtJs" do
       end
       
       it "handles date range params" do
+        offset = Time.now.utc_offset
         date = Date.parse "11/26/2010"
-        start_time = Time.utc( date.year, date.month, date.day )
-        end_time = Time.utc( date.year, date.month, date.day, 23, 59, 59 )
+        start_time = Time.utc( date.year, date.month, date.day ) + offset
+        end_time = Time.utc( date.year, date.month, date.day, 23, 59, 59 ) + offset
         
         params = { "filter" => {
           "0" => {
@@ -133,8 +134,9 @@ describe "ExtJs" do
       end
       
       it "handles invalid comparison operators by falling back to $in" do
+        offset = Time.now.utc_offset
         date = Date.parse "11/26/2010"
-        start_time = Time.utc( date.year, date.month, date.day )
+        start_time = Time.utc( date.year, date.month, date.day ) + offset
         
         params = { "filter" => {
           "0" => {

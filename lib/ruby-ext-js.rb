@@ -150,13 +150,14 @@ module ExtJs
       
       case hash["data"]["type"]
         when "date"
+          offset = Time.now.utc_offset
           values.map!{ |date| date = Date.parse( date ); Time.utc( date.year, date.month, date.day ) }
           if comparison == "=="
             start_time = values[0]
             end_time = Time.utc( start_time.year, start_time.month, start_time.day, 23, 59, 59 )
-            values = { comparison_for( "gt" ) => start_time, comparison_for( "lt" ) => end_time }
+            values = { comparison_for( "gt" ) => start_time + offset, comparison_for( "lt" ) => end_time + offset }
           else
-            values = { comparison => values[0] }
+            values = { comparison => values[0] + offset }
           end
         else
           if values.size == 1
