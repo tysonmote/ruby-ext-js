@@ -89,6 +89,8 @@ describe "ExtJs" do
       
       it "handles date range params" do
         date = Date.parse "11/26/2010"
+        start_time = Time.utc( date.year, date.month, date.day )
+        end_time = Time.utc( date.year, date.month, date.day, 23, 59, 59 )
         
         params = { "filter" => {
           "0" => {
@@ -100,9 +102,8 @@ describe "ExtJs" do
             "field" => "inserted_at"
           }
         }}
-        
         mongo = TestMongoWithFilters.new( params )
-        mongo.conditions.should == { "inserted_at" => { "$lt" => date } }
+        mongo.conditions.should == { "inserted_at" => { "$lte" => start_time } }
         
         params = { "filter" => {
           "0" => {
@@ -114,13 +115,26 @@ describe "ExtJs" do
             "field" => "inserted_at"
           }
         }}
-        
         mongo = TestMongoWithFilters.new( params )
-        mongo.conditions.should == { "inserted_at" => { "$gt" => date } }
+        mongo.conditions.should == { "inserted_at" => { "$gte" => start_time } }
+        
+        params = { "filter" => {
+          "0" => {
+            "data" => {
+              "type" => "date",
+              "value" => "11/26/2010",
+              "comparison" => "eq"
+            },
+            "field" => "inserted_at"
+          }
+        }}
+        mongo = TestMongoWithFilters.new( params )
+        mongo.conditions.should == { "inserted_at" => { "$gte" => start_time, "$lte" => end_time } }
       end
       
       it "handles invalid comparison operators by falling back to $in" do
         date = Date.parse "11/26/2010"
+        start_time = Time.utc( date.year, date.month, date.day )
         
         params = { "filter" => {
           "0" => {
@@ -134,7 +148,7 @@ describe "ExtJs" do
         }}
         
         mongo = TestMongoWithFilters.new( params )
-        mongo.conditions.should == { "inserted_at" => { "$in" => date } }
+        mongo.conditions.should == { "inserted_at" => { "$in" => start_time } }
       end
     end
     

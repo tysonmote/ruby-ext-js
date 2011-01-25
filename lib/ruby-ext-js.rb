@@ -150,8 +150,14 @@ module ExtJs
       
       case hash["data"]["type"]
         when "date"
-          values.map!{ |date| Date.parse( date ) }
-          values = { comparison => values[0] }
+          values.map!{ |date| date = Date.parse( date ); Time.utc( date.year, date.month, date.day ) }
+          if comparison == "=="
+            start_time = values[0]
+            end_time = Time.utc( start_time.year, start_time.month, start_time.day, 23, 59, 59 )
+            values = { comparison_for( "gt" ) => start_time, comparison_for( "lt" ) => end_time }
+          else
+            values = { comparison => values[0] }
+          end
         else
           if values.size == 1
             values = values[0]
@@ -165,8 +171,9 @@ module ExtJs
     
     def self.comparison_for( str )
       case str
-        when "lt"; "$lt"
-        when "gt"; "$gt"
+        when "lt"; "$lte"
+        when "gt"; "$gte"
+        when "eq"; "=="
         else; "$in"
       end
     end
