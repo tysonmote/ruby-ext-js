@@ -1,3 +1,4 @@
+require "date"
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe "ExtJs" do
@@ -20,7 +21,7 @@ describe "ExtJs" do
       
       class TestMongoWithFilters < ExtJs::Mongo
         def self.allowed_filters
-          ["state", "score"]
+          ["state", "score", "inserted_at"]
         end
       end
       
@@ -84,6 +85,56 @@ describe "ExtJs" do
         
         mongo = TestMongoWithFilters.new( params )
         mongo.conditions.should == { "state" => "open", "score" => { "$in" => ["5", "4"] } }
+      end
+      
+      it "handles date range params" do
+        date = Date.parse "11/26/2010"
+        
+        params = { "filter" => {
+          "0" => {
+            "data" => {
+              "type" => "date",
+              "value" => "11/26/2010",
+              "comparison" => "lt"
+            },
+            "field" => "inserted_at"
+          }
+        }}
+        
+        mongo = TestMongoWithFilters.new( params )
+        mongo.conditions.should == { "inserted_at" => { "$lt" => date } }
+        
+        params = { "filter" => {
+          "0" => {
+            "data" => {
+              "type" => "date",
+              "value" => "11/26/2010",
+              "comparison" => "gt"
+            },
+            "field" => "inserted_at"
+          }
+        }}
+        
+        mongo = TestMongoWithFilters.new( params )
+        mongo.conditions.should == { "inserted_at" => { "$gt" => date } }
+      end
+      
+      it "handles invalid comparison operators by falling back to $in" do
+        date = Date.parse "11/26/2010"
+        
+        params = { "filter" => {
+          "0" => {
+            "data" => {
+              "type" => "date",
+              "value" => "11/26/2010",
+              "comparison" => "BOO"
+            },
+            "field" => "inserted_at"
+          }
+        }}
+        
+        mongo = TestMongoWithFilters.new( params )
+        mongo.conditions.should == { "inserted_at" => { "$in" => date } }
       end
     end
     

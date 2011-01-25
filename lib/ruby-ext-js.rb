@@ -1,3 +1,5 @@
+require "date"
+
 module ExtJs
   class Postgres
     def self.db_opts(params, opts = {}); raise NotImplementedError; end
@@ -127,14 +129,7 @@ module ExtJs
           
           next unless params["filter"][i]
           
-          field = (params["filter"][i]["field"] || "").gsub(/[^\.\w\d_-]/, "").strip
-          values = Array( params["filter"][i]["data"] ? params["filter"][i]["data"]["value"] : nil )
-          
-          if values.size == 1
-            values = values[0]
-          elsif values.size > 1
-            values = { "$in" => values }
-          end
+          field, values = self.filter_for( params["filter"][i] )
           
           unless field.empty? || !allowed_filters.include?( field ) || values.empty?
             conds.merge! field => values
@@ -143,6 +138,37 @@ module ExtJs
       end
       
       conds
+    end
+    
+    def self.filter_for( hash )
+      hash["data"] ||= {}
+      hash["field"] ||= ""
+      
+      field = hash["field"].gsub(/[^\.\w\d_-]/, "").strip
+      values = Array( hash["data"]["value"] )
+      comparison = self.comparison_for( hash["data"]["comparison"] )
+      
+      case hash["data"]["type"]
+        when "date"
+          values.map!{ |date| Date.parse( date ) }
+          values = { comparison => values[0] }
+        else
+          if values.size == 1
+            values = values[0]
+          elsif values.size > 1
+            values = { comparison => values }
+          end
+      end
+      
+      return field, values
+    end
+    
+    def self.comparison_for( str )
+      case str
+        when "lt"; "$lt"
+        when "gt"; "$gt"
+        else; "$in"
+      end
     end
   end
 end
