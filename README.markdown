@@ -65,6 +65,10 @@ Examples:
 
 Version number conventions: Patch-level bumps for bug fixes, minor-level bumps for changes that break backwards-compatibility, major-level bumps for major new features.
 
+## 0.3.3
+
+* Fix timezone offset math for `ExtJs::Mongo` date range filters.
+
 ## 0.3.2
 
 * Respect local time offset for `ExtJs::Mongo` date range filters.
