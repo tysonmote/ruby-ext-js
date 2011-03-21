@@ -2,19 +2,6 @@ require "date"
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe "ExtJs" do
-  # describe "Postgres" do
-  #   it "sorts on id when you ask it to sort on created_at" do
-  #     ExtJs::Postgres.pagination_opts({
-  #       :sort => "created_at",
-  #       :order => "desc"
-  #     })[:order].should == [:id.asc]
-  #   end
-  #   
-  #   it "specs the rest of the class or it gets the hose" do
-  #     pending "The current spec suite is currently rigidly tied to private models. Someday we'll write a generic spec suite here."
-  #   end
-  # end
-  
   describe "Mongo" do
     describe "conditions" do
       class TestMongoNoFilters < ExtJs::Mongo; end
@@ -22,6 +9,20 @@ describe "ExtJs" do
       class TestMongoWithFilters < ExtJs::Mongo
         def self.allowed_filters
           ["state", "score", "inserted_at"]
+        end
+      end
+      
+      class TestMongoWithFiltersAndFilterOpts < ExtJs::Mongo
+        def self.allowed_filters
+          ["state", "score", "inserted_at"]
+        end
+        
+        def self.filter_opts
+          {
+            "state" => { :all_caps => true },
+            "score" => { :operator => "$all" },
+            "inserted_at" => { :strip => true }
+          }
         end
       end
       
@@ -151,6 +152,38 @@ describe "ExtJs" do
         
         mongo = TestMongoWithFilters.new( params )
         mongo.conditions.should == { "inserted_at" => { "$in" => start_time } }
+      end
+      
+      it "allows specifying filter options per-field" do
+        params = {
+          "filter" => {
+            "0" => {
+              "field" => "state",
+              "data" => {
+                "value" => "open"
+              }
+            },
+            "1" => {
+              "field" => "score",
+              "data" => {
+                "value" => ["5", "4"]
+              }
+            },
+            "2" => {
+              "field" => "inserted_at",
+              "data" => {
+                "value" => [" Thursday "]
+              }
+            }
+          }
+        }
+        
+        mongo = TestMongoWithFiltersAndFilterOpts.new( params )
+        mongo.conditions.should == {
+          "state" => "OPEN",
+          "score" => { "$all" => ["5", "4"] },
+          "inserted_at" => "Thursday"
+        }
       end
     end
     

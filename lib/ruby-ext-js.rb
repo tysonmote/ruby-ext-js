@@ -80,7 +80,7 @@ module ExtJs
     
     # @return [Hash] `find()` conditions for `Mongo::Collection.find( conditions, opts )`
     def conditions
-      self.class.search_param( @params )
+      self.class.filter_param( @params )
     end
     
     # @return [Hash] `find()` options for `Mongo::Collection.find( conditions, opts )`
@@ -97,6 +97,16 @@ module ExtJs
     # @return [Array] Array of string values representing keys that are filterable.
     def self.allowed_filters
       []
+    end
+    
+    # Define options for specific filters. Eg:
+    #   {
+    #     "field_1" => { :all_caps => true },
+    #     "field_2" => { :operator => "$all" },
+    #     "field_3" => { :strip => "true" }
+    #   }
+    def self.filter_opts
+      {}
     end
     
     protected
@@ -120,7 +130,7 @@ module ExtJs
       { :sort => [sort, dir] }
     end
     
-    def self.search_param( params )
+    def self.filter_param( params )
       conds = {}
       
       if params["filter"] && params["filter"].size > 0
@@ -167,7 +177,52 @@ module ExtJs
           end
       end
       
+      values = self.apply_filter_opts( field, values )
+      
       return field, values
+    end
+    
+    def self.apply_filter_opts( field, values )
+      return values if values.size == 0
+      
+      opts = {
+        :strip => true,
+        :all_caps => false,
+        :operator => nil
+      }.merge( filter_opts[field] || {} )
+      
+      if values.is_a?( String ) || values.is_a?( Array )
+        opts[:operator] ||= "$in"
+        values = Array( values )
+        values.map!{ |value| value.strip } if opts[:strip]
+        values.map!{ |value| value.upcase } if opts[:all_caps]
+        values = values.size > 1 ? { opts[:operator] => values } : values.first
+      elsif values.is_a?( Hash )
+        # Values is already a { "$in" => [1, 2] } style hash
+        if opts[:operator]
+          values = { opts[:operator] => values.values.flatten.uniq }
+        end
+        if opts[:strip]
+          values.each do |k, v|
+            if v.is_a?( Array )
+              values[k] = v.map{ |value| value.strip }
+            elsif v.is_a?( String )
+              values[k] = v.strip
+            end
+          end
+        end
+        if opts[:all_caps]
+          values.each do |k, v|
+            if v.is_a?( Array )
+              values[k] = v.map{ |value| value.upcase }
+            elsif v.is_a?( String )
+              values[k] = v.upcase
+            end
+          end
+        end
+      end
+      
+      values
     end
     
     def self.comparison_for( str )
